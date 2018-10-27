@@ -13,14 +13,34 @@ var x_axis = d3.scaleLinear().range([0, width]).domain([-max_r, max_r]),
 
 var svg = d3.select("#pmts");
 
+var button_easy = d3.select("#easy");
+var button_hard = d3.select("#hard");
+
 var pos_info = d3.select("#info").append("div");
 var results = d3.select("#results").append("div");
 
 var event_count = 0;
 var mouse = [0, 0];
 
+var scores = {'mp' : 0, 'ws': 0, 'rwm': 0, 'nn': 0, 'tpf': 0, 'you': 0};
+var score_count = 0;
+
+var mode = 'easy';
+
+function resetGame() {
+    scores = {'mp' : 0, 'ws': 0, 'rwm': 0, 'nn': 0, 'tpf': 0, 'you': 0};
+    score_count = 0;
+    event_count = 1;
+    results.remove();
+    setEvent(0);
+}
+
 function setEvent(i) {
-    var pat = game_data[i]['pattern'];
+    var pat;
+    if (mode == 'easy')
+        pat = game_data[i]['pattern'];
+    else
+        pat = game_data_hard[i]['pattern'];
     var norm = d3.scaleLog().domain([0.5, d3.max(pat)]).range([0, 1]);
     d3.selectAll("circle")
         .data(pat)
@@ -30,15 +50,18 @@ function setEvent(i) {
 }
 
 function scoreEvent(i, mouse) {
-    var truth = game_data[i]['truth'];
-    var distance = game_data[i]['distance'];
+    var truth, distance;
+    if (mode == 'easy') {
+        truth = game_data[i]['truth'];
+        distance = game_data[i]['distance'];
+    } else {
+        truth = game_data_hard[i]['truth'];
+        distance = game_data_hard[i]['distance'];
+    }
     distance['you'] = Math.sqrt(Math.pow((truth['x'] - toPos(mouse[0])), 2) +
                                 Math.pow((truth['y'] + toPos(mouse[1])), 2));
     return distance;
 }
-
-var scores = {'mp' : 0, 'ws': 0, 'rwm': 0, 'nn': 0, 'tpf': 0, 'you': 0};
-var score_count = 0;
 
 function setResult(distance) {
     results.remove();
@@ -99,4 +122,16 @@ svg.on('click', function() {
         setEvent(event_count);
     }
     event_count++;
+});
+button_easy.on('click', function() {
+    mode = 'easy';
+    resetGame();
+    button_easy.classed('active', true);
+    button_hard.classed('active', false);
+});
+button_hard.on('click', function() {
+    mode = 'hard';
+    resetGame();
+    button_hard.classed('active', true);
+    button_easy.classed('active', false);
 });
