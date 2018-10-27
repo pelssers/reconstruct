@@ -13,7 +13,7 @@ var x_axis = d3.scaleLinear().range([0, width]).domain([-max_r, max_r]),
 
 var svg = d3.select("#pmts");
 
-var pos_info = d3.select("#results").append("div");
+var pos_info = d3.select("#info").append("div");
 var results = d3.select("#results").append("div");
 
 var event_count = 0;
